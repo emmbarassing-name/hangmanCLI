@@ -81,14 +81,14 @@ fn computeGuess(
 ) {
     let letterGuesseed = currentGuess.chars().nth(0).unwrap();
 
-    let mut isValid = false;
+    let mut isValid = lettersToGuess.contains(&letterGuesseed);
 
-    for letter in lettersToGuess.iter() {
-        if *letter == letterGuesseed {
-            isValid = true;
-            break;
-        }
-    }
+    // for letter in lettersToGuess.iter() {
+    //     if *letter == letterGuesseed {
+    //         isValid = true;
+    //         break;
+    //     }
+    // }
 
     if isValid {
         currentGuesses.insert(letterGuesseed);
