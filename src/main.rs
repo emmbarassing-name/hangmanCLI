@@ -83,13 +83,6 @@ fn computeGuess(
 
     let mut isValid = lettersToGuess.contains(&letterGuesseed);
 
-    // for letter in lettersToGuess.iter() {
-    //     if *letter == letterGuesseed {
-    //         isValid = true;
-    //         break;
-    //     }
-    // }
-
     if isValid {
         currentGuesses.insert(letterGuesseed);
     }
