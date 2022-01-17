@@ -1,9 +1,10 @@
 use rand::{self, Rng};
 use std::collections::HashSet;
+use std::fmt::format;
 use std::fs::{read_to_string, File};
-use std::io;
 use std::io::Read;
 use std::iter::FromIterator;
+use std::{array, io};
 use std::{thread, time};
 
 fn read_line() -> String {
@@ -78,14 +79,17 @@ fn computeGuess(
     currentGuesses: &mut HashSet<char>,
     lettersToGuess: &mut HashSet<char>,
     currentGuess: &String,
-) {
+) -> bool {
     let letterGuesseed = currentGuess.chars().nth(0).unwrap();
 
     let mut isValid = lettersToGuess.contains(&letterGuesseed);
 
     if isValid {
         currentGuesses.insert(letterGuesseed);
+        return true;
     }
+
+    return false;
 }
 
 fn generateHashSetForGuesses(targetWord: String) -> HashSet<char> {
@@ -98,7 +102,7 @@ fn generateHashSetForGuesses(targetWord: String) -> HashSet<char> {
     return usedLetters;
 }
 
-fn printRemainingWord(userGuesses: &HashSet<char>, targetWord: String) {
+fn computeRemainingWord(userGuesses: &HashSet<char>, targetWord: String) -> String {
     let mut stringToPrint = String::new();
 
     for letter in targetWord.chars() {
@@ -108,27 +112,119 @@ fn printRemainingWord(userGuesses: &HashSet<char>, targetWord: String) {
             stringToPrint += &String::from(" _ ")
         }
     }
-    println!("{}", stringToPrint)
+    return stringToPrint;
+}
+
+fn addLnToScene(existingScene: &mut String, targetLn: &str) {
+    existingScene.to_owned();
+
+    existingScene.push_str(
+        "
+    ",
+    );
+    existingScene.push_str(targetLn);
 }
 
 fn guessLoop(targetWord: String) {
     let mut lettersToGuess = generateHashSetForGuesses(targetWord.clone());
     let mut userGuesses: HashSet<char> = HashSet::new();
+    let mut totalUserGuesses = 0;
 
     loop {
-        println!("guess a letter pardner!");
+        let mut stringToPrint = String::new();
+        addLnToScene(&mut stringToPrint, "guess a letter pardner!");
         let currentGuess = read_line();
         //userGuesses is mutated in here rather than regenerated and returned
-        computeGuess(&mut userGuesses, &mut lettersToGuess, &currentGuess);
-
-        printRemainingWord(&userGuesses, targetWord.clone());
+        let correctGuess = computeGuess(&mut userGuesses, &mut lettersToGuess, &currentGuess);
 
         let isWin: bool = userGuesses.len() == lettersToGuess.len();
-        if (isWin) {
-            println!("aw shucks, you win");
-            break;
+        let isLose: bool = totalUserGuesses >= 6;
+
+        drawHangmanPic(totalUserGuesses);
+
+        if !correctGuess {
+            totalUserGuesses += 1;
         }
+
+        addLnToScene(
+            &mut stringToPrint,
+            &*computeRemainingWord(&userGuesses, targetWord.clone()),
+        );
+
+        if (isWin) {
+            addLnToScene(&mut stringToPrint, "aw shucks, you win");
+        }
+        if (isLose) {
+            addLnToScene(&mut stringToPrint, "farewell, pardner, I hardly knew ye");
+            addLnToScene(&mut stringToPrint, "game over");
+        }
+
+        println!("{}", stringToPrint)
     }
+}
+
+fn drawHangmanPic(wrongGuesses: i32) {
+    let hangmanArr = [
+        "
+    +---+
+    |   |
+        |
+        |
+        |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+        |
+        |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+    |   |
+        |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+   /|   |
+        |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+   /|\\  |
+        |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+   /|\\  |
+   /    |
+        |
+  =========",
+        "
+    +---+
+    |   |
+    O   |
+   /|\\  |
+   / \\  |
+        |
+  =========",
+    ];
+
+    let currentPic = hangmanArr[wrongGuesses as usize];
+    println!("{}", currentPic);
 }
 
 fn main() {
