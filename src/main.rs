@@ -1,4 +1,4 @@
-use rand::{self, Rng};
+use rand::{self, random, Rng};
 use std::collections::HashSet;
 use std::fmt::format;
 use std::fs::{read_to_string, File};
@@ -37,20 +37,20 @@ fn generate_word_pool(dictionaryPath: String) -> Vec<String> {
 //TODO figure out how to do this casting to an array or something idk maybe something like .collect-ing into an array?
 fn generate_target_word(wordPool: Vec<String>) -> String {
     let mut wordPoolLen = 0;
-    let mut targetWord = String::new();
     let worldPoolForForLength = wordPool.to_vec();
+    let mut targetWord = String::new();
 
     for _word in worldPoolForForLength {
         wordPoolLen += 1;
     }
 
     let mut rng = rand::thread_rng();
-    let randomIndex = rng.gen_range(1..=wordPoolLen);
+    let randomIndex = &rng.gen_range(1..=wordPoolLen);
 
     let mut index = 0;
 
     for potentialTarget in wordPool {
-        if (index == randomIndex) {
+        if (index == *randomIndex) {
             targetWord = potentialTarget;
             break;
         }
@@ -132,34 +132,42 @@ fn guessLoop(targetWord: String) {
 
     loop {
         let mut stringToPrint = String::new();
-        addLnToScene(&mut stringToPrint, "guess a letter pardner!");
         let currentGuess = read_line();
+        let mut shouldExit = false;
         //userGuesses is mutated in here rather than regenerated and returned
         let correctGuess = computeGuess(&mut userGuesses, &mut lettersToGuess, &currentGuess);
 
         let isWin: bool = userGuesses.len() == lettersToGuess.len();
         let isLose: bool = totalUserGuesses >= 6;
 
-        drawHangmanPic(totalUserGuesses);
-
         if !correctGuess {
             totalUserGuesses += 1;
         }
+
+        drawHangmanPic(totalUserGuesses);
 
         addLnToScene(
             &mut stringToPrint,
             &*computeRemainingWord(&userGuesses, targetWord.clone()),
         );
 
+        addLnToScene(&mut stringToPrint, "guess a letter pardner!");
+
         if (isWin) {
             addLnToScene(&mut stringToPrint, "aw shucks, you win");
+            shouldExit = true;
         }
         if (isLose) {
             addLnToScene(&mut stringToPrint, "farewell, pardner, I hardly knew ye");
             addLnToScene(&mut stringToPrint, "game over");
+            shouldExit = true;
         }
 
-        println!("{}", stringToPrint)
+        println!("{}", stringToPrint);
+
+        if (shouldExit == true) {
+            break;
+        }
     }
 }
 
