@@ -138,7 +138,7 @@ fn guessLoop(targetWord: String) {
         let correctGuess = computeGuess(&mut userGuesses, &mut lettersToGuess, &currentGuess);
 
         let isWin: bool = userGuesses.len() == lettersToGuess.len();
-        let isLose: bool = totalUserGuesses >= 6;
+        let isLose: bool = totalUserGuesses >= 7;
 
         if !correctGuess {
             totalUserGuesses += 1;
